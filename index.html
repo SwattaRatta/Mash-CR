@@ -271,3 +271,267 @@
     </script>
 </body>
 </html>
+            /* College-ruled lined paper */
+            background: linear-gradient(#e0e0e0 1px, transparent 1px) 0 0 / 100% 24px,
+                        /* Lisa Frank-style D&D stickers (placeholders) */
+                        url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAL1JREFUWEftl8ENgCAMRFk3N7o3ujcKRxnsWBAgQNgRj+1OQ5bkmfOQJEmSJEmSJEmSJMmTJz/5rP8E8D8B/B8A/i8AfwT4rwD8G4D/BuDfAPwbgH8D8O8A/h2Afwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DsAfwPo5Q4q6gT9HAAAAABJRU5ErkJggg==') 50px 100px no-repeat,
+                        url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAK5JREFUWEftl8ENgCAMRFk3N7o3ujcKRxnsWBAgQNgRj+1OQ5bkmfOQJEmSJEmSJEmSJMmTJz/5rP8E8D8B/B8A/i8AfwT4rwD8G4D/BuDfAPwbgH8D8O8A/h2Afwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/h3AP8O4N8B/DuAfwfw7wD+HcC/A/gLMlYq6gT9HAAAAABJRU5ErkJggg==') 300px 300px no-repeat,
+                        #fff; /* White base */
+            background-position: 0 12px, 50px 100px, 300px 300px;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff4040; /* Red margin line */
+        }
+        .category { margin: 15px; }
+        input { margin: 5px; width: 200px; background: rgba(255, 255, 255, 0.8); border: 1px solid #ccc; }
+        button { padding: 10px 20px; font-size: 16px; margin: 5px; background: #fff; border: 1px solid #000; }
+        #result, #daydream { margin-top: 20px; font-size: 18px; background: rgba(255, 255, 255, 0.8); padding: 10px; }
+        #spiralCanvas { border: 1px solid black; margin: 10px auto; display: block; background: #fff; }
+    </style>
+</head>
+<body>
+    <h1>MASH: Predict Your Future!</h1>
+    
+    <div class="category"><h3>Housing (MASH + 1 random)</h3></div>
+    <div class="category">
+        <h3>Spouse</h3>
+        <input type="text" id="spouse1" placeholder="Option 1"><br>
+        <input type="text" id="spouse2" placeholder="Option 2"><br>
+        <input type="text" id="spouse3" placeholder="Option 3"><br>
+        <input type="text" id="spouse4" placeholder="Option 4">
+    </div>
+    <div class="category">
+        <h3>Job</h3>
+        <input type="text" id="job1" placeholder="Option 1"><br>
+        <input type="text" id="job2" placeholder="Option 2"><br>
+        <input type="text" id="job3" placeholder="Option 3"><br>
+        <input type="text" id="job4" placeholder="Option 4">
+    </div>
+    <div class="category">
+        <h3>Kids</h3>
+        <input type="text" id="kids1" placeholder="Option 1"><br>
+        <input type="text" id="kids2" placeholder="Option 2"><br>
+        <input type="text" id="kids3" placeholder="Option 3"><br>
+        <input type="text" id="kids4" placeholder="Option 4">
+    </div>
+    <div class="category">
+        <h3>Car</h3>
+        <input type="text" id="car1" placeholder="Option 1"><br>
+        <input type="text" id="car2" placeholder="Option 2"><br>
+        <input type="text" id="car3" placeholder="Option 3"><br>
+        <input type="text" id="car4" placeholder="Option 4">
+    </div>
+    
+    <h3>Draw Your Spiral Here!</h3>
+    <canvas id="spiralCanvas" width="400" height="400"></canvas>
+    
+    <button onclick="playMash()">Predict My Future!</button>
+    <button onclick="dayDream()">DayDream</button>
+    
+    <div id="result"></div>
+    <div id="daydream"></div>
+
+    <script>
+        let mashResult = {};
+        let drawing = false;
+        let points = [];
+        let spiralCount = 0;
+
+        const canvas = document.getElementById("spiralCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "blue";
+
+        canvas.addEventListener("mousedown", (e) => {
+            drawing = true;
+            points = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const rect = canvas.getBoundingClientRect();
+            points.push({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const newPoint = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            points.push(newPoint);
+            ctx.beginPath();
+            ctx.moveTo(points[points.length - 2].x, points[points.length - 2].y);
+            ctx.lineTo(newPoint.x, newPoint.y);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+            spiralCount = countRings();
+            console.log("Spiral count:", spiralCount);
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+            drawing = false;
+        });
+
+        function countRings() {
+            if (points.length < 10) return 3;
+            let intersections = 0;
+            const yCenter = canvas.height / 2;
+            for (let i = 1; i < points.length; i++) {
+                const p1 = points[i - 1];
+                const p2 = points[i];
+                if ((p1.y < yCenter && p2.y >= yCenter) || (p1.y >= yCenter && p2.y < yCenter)) {
+                    intersections++;
+                }
+            }
+            return Math.max(3, Math.floor(intersections / 2));
+        }
+
+        // Critical Role character/NPC randomizers
+        function getRandomCRSpouse() {
+            const spouses = [
+                // Vox Machina
+                "Vex’ahlia", "Vax’ildan", "Keyleth", "Percival de Rolo", "Pike Trickfoot",
+                // Mighty Nein
+                "Jester Lavorre", "Caleb Widogast", "Beauregard Lionett", "Fjord", "Yasha Nydoorin",
+                // Bells Hells
+                "Imogen Temult", "Orym", "Ashton Greymoore", "Fearne Calloway", "Chetney Pock O’Pea",
+                // NPCs
+                "Allura Vysoren", "Gilmore", "Essek Thelyss", "Artagan", "Dorian Storm"
+            ];
+            return spouses[Math.floor(Math.random() * spouses.length)];
+        }
+
+        function getRandomCRJob() {
+            const jobs = [
+                // Vox Machina-inspired
+                "Slayer of Dragons", "Whitestone Gunslinger", "Voice of the Tempest", "Cleric of Sarenrae",
+                // Mighty Nein-inspired
+                "Chaos Crew Trickster", "Fire Wizard", "Monk of the Cobalt Soul", "Warlock of the Sea",
+                // Bells Hells-inspired
+                "Telepathic Sorcerer", "Air Ashari Fighter", "Earthbreaker Barbarian", "Fae Thief",
+                // General D&D/CR flair
+                "Archmage Advisor", "Hot Boi Shadowhand", "Traveling Bard", "Pumat Sol Enchanter"
+            ];
+            return jobs[Math.floor(Math.random() * jobs.length)];
+        }
+
+        function getRandomCRKid() {
+            const kids = [
+                // Vox Machina
+                "Vesper de Rolo", "Wolfe de Rolo", "Little Orphan Pike",
+                // Mighty Nein
+                "Luc Brenatto", "Nugget (the Sprinkle)", "Professor Thaddeus",
+                // Bells Hells
+                "Little Mister (Fearne’s Monkey)", "Pate de Rolo (Laudna’s Rat)",
+                // NPCs/Flavor
+                "Kynan Leore", "Taryon Darrington’s Ward", "Sprinkle Jr.", "Baby Owlbear"
+            ];
+            return kids[Math.floor(Math.random() * kids.length)];
+        }
+
+        function getRandomCRCar() {
+            const cars = [
+                // Vox Machina
+                "Broom of Flying", "Deathwalker’s Ward", "Airship of Vox Machina",
+                // Mighty Nein
+                "Mistake (the Ship)", "Ball Eater", "Jester’s Magical Carriage",
+                // Bells Hells
+                "Crawling King’s Cart", "Fearne’s Faun Legs", "Ashton’s Hammer Sled",
+                // General CR/D&D
+                "Crimson Weasel Wagon", "Gilmore’s Glorious Ride", "Essek’s Floating Disc", "Artagan’s Gate-Mobile"
+            ];
+            return cars[Math.floor(Math.random() * cars.length)];
+        }
+
+        function getRandomWord() {
+            const words = ["Pineapple", "Disco", "Wizard", "Noodle", "Goblin", "Cloud", "Tractor", "Velvet"];
+            return words[Math.floor(Math.random() * words.length)];
+        }
+
+        function pickWithCount(options) {
+            const count = spiralCount || Math.floor(Math.random() * 5) + 3;
+            let index = 0;
+            while (options.length > 1) {
+                index = (index + count - 1) % options.length;
+                options.splice(index, 1);
+            }
+            return options[0];
+        }
+
+        function playMash() {
+            const housing = ["Mansion", "Apartment", "Shack", "House", getRandomWord()];
+            mashResult.house = pickWithCount([...housing]);
+
+            const spouse1 = document.getElementById("spouse1").value || getRandomCRSpouse();
+            const spouse2 = document.getElementById("spouse2").value || getRandomCRSpouse();
+            const spouse3 = document.getElementById("spouse3").value || getRandomCRSpouse();
+            const spouse4 = document.getElementById("spouse4").value || getRandomCRSpouse();
+            const spouses = [spouse1, spouse2, spouse3, spouse4, getRandomWord()];
+            mashResult.spouse = pickWithCount([...spouses]);
+
+            const job1 = document.getElementById("job1").value || getRandomCRJob();
+            const job2 = document.getElementById("job2").value || getRandomCRJob();
+            const job3 = document.getElementById("job3").value || getRandomCRJob();
+            const job4 = document.getElementById("job4").value || getRandomCRJob();
+            const jobs = [job1, job2, job3, job4, getRandomWord()];
+            mashResult.job = pickWithCount([...jobs]);
+
+            const kids1 = document.getElementById("kids1").value || getRandomCRKid();
+            const kids2 = document.getElementById("kids2").value || getRandomCRKid();
+            const kids3 = document.getElementById("kids3").value || getRandomCRKid();
+            const kids4 = document.getElementById("kids4").value || getRandomCRKid();
+            const kids = [kids1, kids2, kids3, kids4, getRandomWord()];
+            mashResult.kids = pickWithCount([...kids]);
+
+            const car1 = document.getElementById("car1").value || getRandomCRCar();
+            const car2 = document.getElementById("car2").value || getRandomCRCar();
+            const car3 = document.getElementById("car3").value || getRandomCRCar();
+            const car4 = document.getElementById("car4").value || getRandomCRCar();
+            const cars = [car1, car2, car3, car4, getRandomWord()];
+            mashResult.car = pickWithCount([...cars]);
+
+            const result = `You will live in a ${mashResult.house}, marry ${mashResult.spouse}, work as a ${mashResult.job}, have ${mashResult.kids} as your kids, and ride a ${mashResult.car}. (Spiral count: ${spiralCount})`;
+            document.getElementById("result").innerHTML = result;
+            document.getElementById("daydream").innerHTML = "";
+        }
+
+        function dayDream() {
+            if (!mashResult.house) {
+                document.getElementById("daydream").innerHTML = "Please predict your future first!";
+                return;
+            }
+
+            const settings = ["the ruins of Aeor", "a Feywild glade", "a pirate ship on the Lucidian Ocean",
+                            "a haunted Whitestone castle", "the streets of Jrusar"];
+            const actions = ["battling an ancient dragon", "casting a wild magic surge", "negotiating with a hag",
+                            "stealing from a beholder’s lair", "rolling a nat 20 on a persuasion check"];
+            const twists = ["turns out it’s all a Fey prank", "and then the dice start glowing ominously",
+                           "because your ride starts whispering cryptic prophecies", "while your kid summons a demon",
+                           "and your job involves a pact with an archfey"];
+            const endings = ["and you all adventure chaotically ever after!", "until the DM calls for a break.",
+                            "and then you wake up as your own ride!", "with your spouse plotting a heist.",
+                            "and Exandria throws you a legendary feast—sort of."];
+
+            const setting = settings[Math.floor(Math.random() * settings.length)];
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            const twist = twists[Math.floor(Math.random() * twists.length)];
+            const ending = endings[Math.floor(Math.random() * endings.length)];
+
+            const story = `
+                Picture this: you're living in your ${mashResult.house}, nestled in ${setting}. 
+                One day, ${mashResult.spouse} bursts in, shouting about ${action}. 
+                You hop on your ${mashResult.car}, which—plot twist—${twist}. 
+                Meanwhile, ${mashResult.kids} is off being the weirdest adventurer ever, 
+                and your gig as a ${mashResult.job} suddenly makes zero sense. 
+                In the end, ${ending}
+            `;
+            document.getElementById("daydream").innerHTML = story.trim();
+        }
+    </script>
+</body>
+</html>
